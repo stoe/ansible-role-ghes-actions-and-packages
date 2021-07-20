@@ -1,0 +1,20 @@
+galaxy_info:
+  author: Stefan Stölzle <stefan@stoelzle.me>
+  description: GitHub Enterprise Server actions & packages configuration
+
+  min_ansible_version: 2.8
+
+  platforms:
+  - name: Debian
+    versions:
+    - stretch
+
+  license: none
+
+  galaxy_tags:
+    - github
+    - enterprise
+    - server
+    - ghes
+    - actions
+    - packages

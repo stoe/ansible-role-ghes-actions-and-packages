@@ -1,0 +1,76 @@
+---
+# https://docs.ansible.com/ansible/latest/collections/ansible/builtin/include_tasks_module.html
+- include_tasks: connection.yml
+
+# https://docs.ansible.com/ansible/latest/collections/ansible/builtin/include_tasks_module.html
+- include_tasks: actions_s3.yml
+  when:
+    - actions_enabled is defined
+    - actions_enabled|bool
+    - actions_provider == "s3"
+
+# https://docs.ansible.com/ansible/latest/collections/ansible/builtin/include_tasks_module.html
+- include_tasks: actions_azure.yml
+  when:
+    - actions_enabled is defined
+    - actions_enabled|bool
+    - actions_provider == "azure"
+
+# https://docs.ansible.com/ansible/latest/collections/ansible/builtin/include_tasks_module.html
+- include_tasks: actions_minio.yml
+  when:
+    - actions_enabled is defined
+    - actions_enabled|bool
+    - actions_provider == "minio"
+
+- name: '{{ "Enable" if actions_enabled|bool else "Disable" }} GitHub Actions'
+  # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/shell_module.html
+  shell: 'ghe-config app.actions.enabled {{ actions_enabled|lower }}'
+  register: s3_enable
+  failed_when: s3_enable.rc >= 1
+  when:
+    - actions_enabled is defined
+
+# https://docs.ansible.com/ansible/latest/collections/ansible/builtin/include_tasks_module.html
+- include_tasks: packages_s3.yml
+  when:
+    - packages_enabled is defined
+    - packages_enabled|bool
+    - packages_provider == "s3"
+
+# https://docs.ansible.com/ansible/latest/collections/ansible/builtin/include_tasks_module.html
+- include_tasks: packages_minio.yml
+  when:
+    - packages_enabled is defined
+    - packages_enabled|bool
+    - packages_provider == "minio"
+
+- name: '{{ "Enable" if packages_enabled|bool else "Disable" }} GitHub Packages'
+  # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/shell_module.html
+  shell: 'ghe-config app.packages.enabled {{ actions_enabled|lower }}'
+  register: packages_enable
+  failed_when: packages_enable.rc >= 1
+  when:
+    - packages_enabled is defined
+
+- name: Apply GitHub Enterprise Server configuration
+  # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/shell_module.html
+  shell: ghe-config-apply
+  register: config_apply
+  failed_when: >
+    (config_apply.rc >= 1) or
+    ('Finished cluster configuration' not in config_apply.stdout)
+  when: >
+    (actions_enabled is defined) or
+    (packages_enabled is defined)
+
+- name: Check GitHub Actions
+  # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/shell_module.html
+  shell: ghe-actions-check -s blob
+  register: s3_check
+  failed_when: >
+    (s3_check.rc >= 1) or
+    ('Blob Storage is healthy!' not in s3_check.stdout)
+  when:
+    - actions_enabled is defined
+    - actions_enabled|bool

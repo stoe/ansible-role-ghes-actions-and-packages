@@ -1,0 +1,31 @@
+---
+- name: Set GitHub Actions provider Amazon S3
+  # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/shell_module.html
+  shell: ghe-config secrets.actions.storage.blob-provider s3
+
+- name: Test GitHub Actions Amazon S3 provider connection
+  # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/command_module.html
+  shell: 'ghe-actions-precheck -p s3 -cs "BucketName={{ actions_s3.bucket_name }};AccessKeyId={{ actions_s3.access_key_id }};SecretAccessKey={{ actions_s3.access_secret }};ServiceUrl={{ actions_s3.service_url }};PathPrefix=actions-storage-check"' # noqa 204
+  register: s3_test
+  failed_when: >
+    (s3_test.rc >= 1) or
+    ("All Storage tests passed" not in s3_test.stdout)
+  # https://docs.ansible.com/ansible/latest/dev_guide/developing_program_flow_modules.html#ansible-no-log
+  # we do not log to not expose the admin password
+  no_log: true
+
+- name: Configure GitHub Actions Amazon S3 provider
+  # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/shell_module.html
+  shell: |
+    ghe-config secrets.actions.storage.s3.service-url {{ actions_s3.service_url }}
+
+    ghe-config secrets.actions.storage.s3.bucket-name {{ actions_s3.bucket_name }}
+
+    ghe-config secrets.actions.storage.s3.access-key-id "{{ actions_s3.access_key_id }}"
+
+    ghe-config secrets.actions.storage.s3.access-secret "{{ actions_s3.access_secret }}"
+  register: s3_configure
+  failed_when: s3_configure.rc >= 1
+  # https://docs.ansible.com/ansible/latest/dev_guide/developing_program_flow_modules.html#ansible-no-log
+  # we do not log to not expose the admin password
+  no_log: true

@@ -1,0 +1,6 @@
+---
+- name: Wait for connection
+  # http://docs.ansible.com/ansible/wait_for_connection_module.html
+  wait_for_connection:
+    sleep: 10
+    timeout: 300

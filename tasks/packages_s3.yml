@@ -1,0 +1,28 @@
+---
+- name: Configure GitHub Packages Amazon S3 provider
+  # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/shell_module.html
+  shell: |
+    ghe-config secrets.packages.service-url {{ packages.service_url }}
+
+    ghe-config secrets.packages.s3-bucket {{ packages.bucket_name }}
+
+    ghe-config secrets.packages.access-key-id "{{ packages.access_key_id }}"
+
+    ghe-config secrets.packages.access-secret "{{ packages.access_secret }}"
+
+    ghe-config secrets.packages.s3-region "{{ packages.s3_region }}"
+
+    ghe-config secrets.packages.docker-enabled {{ packages.docker|lower }}
+
+    ghe-config secrets.packages.maven-enabled {{ packages.maven|lower }}
+
+    ghe-config secrets.packages.npm-enabled {{ packages.npm|lower }}
+
+    ghe-config secrets.packages.rubygems-enabled {{ packages.rubygems|lower }}
+
+    ghe-config secrets.packages.nuget-enabled {{ packages.nuget|lower }}
+  register: packages_configure
+  failed_when: packages_configure.rc >= 1
+  # https://docs.ansible.com/ansible/latest/dev_guide/developing_program_flow_modules.html#ansible-no-log
+  # we do not log to not expose the admin password
+  no_log: true

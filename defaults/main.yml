@@ -1,0 +1,40 @@
+---
+actions_enabled: false
+
+# Amazon S3 (s3)
+# Azure Blob storage (azure)
+# S3-compatible MinIO Gateway for NAS (minio)
+actions_provider: s3
+
+actions_s3:
+  service_url: https://s3.<AWS-REGIONAL-ENDPOINT>.amazonaws.com
+  bucket_name: github-actions-storage-test
+  access_key_id: "AWS-ACCESS-KEY-ID"
+  access_secret: "AWS-ACCESS-SECRET"
+
+# TODO: not implemented
+actions_azure: {}
+
+# TODO: not implemented
+actions_minio: {}
+
+packages_enabled: false
+
+# Amazon S3 (s3)
+# S3-compatible MinIO Gateway for NAS (minio)
+packages_provider: s3
+
+packages:
+  service_url: https://s3.<AWS-REGIONAL-ENDPOINT>.amazonaws.com
+  bucket_name: github-actions-storage-test
+  access_key_id: "AWS-ACCESS-KEY-ID"
+  access_secret: "AWS-ACCESS-SECRET"
+  s3_region: "AWS-REGIONAL-ENDPOINT"
+  # `true` to enable
+  # `false` to disable
+  # `readonly` to make read-only
+  docker: false
+  maven: false
+  npm: false
+  rubygems: false
+  nuget: false
